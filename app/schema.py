@@ -19,3 +19,13 @@ class RedditPostSchema(BaseModel):
     number_of_comments: int
     score: int
     ups: int
+    comments: list['RedditCommentSchema'] | None
+
+
+class RedditCommentSchema(BaseModel):
+    author: str
+    author_id: str
+    datetime_post: datetime.datetime
+    score: int
+    comment_text: str
+    link: str

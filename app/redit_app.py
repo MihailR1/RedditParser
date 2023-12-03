@@ -17,12 +17,10 @@ class Reddit:
     )
     subbredits_list: list[SubbReditSchema] = None
 
-    def __post_init__(self):
-        self.subbredits_list = self.get_list_of_popular_subreddits()
-
     def get_list_of_popular_subreddits(self) -> list[SubbReditSchema]:
         reddits_iterator = self.reddit.subreddits.popular()
         subbredits_parsed_to_schema = self.parse_subreddits_to_schema(reddits_iterator)
+        self.subbredits_list = subbredits_parsed_to_schema
         return subbredits_parsed_to_schema
 
     @staticmethod
