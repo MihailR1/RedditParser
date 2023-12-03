@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     REDDIT_CLIENT_ID: str
     REDDIT_APP_NAME: str
     REDDIT_REDIRECT_URI: str
-    REDDIT_USER_AGENT: str = 'testscript by echobot392'
-    REDDIT_BASE_URL: str = 'https://www.reddit.com/'
+    REDDIT_USER_AGENT: str = "testscript by echobot392"
+    REDDIT_BASE_URL: str = "https://www.reddit.com/"
 
     class Config:
         env_file = "../.env"
