@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -9,8 +9,7 @@ class Settings(BaseSettings):
     REDDIT_USER_AGENT: str = "testscript by echobot392"
     REDDIT_BASE_URL: str = "https://www.reddit.com/"
 
-    class Config:
-        env_file = "../.env"
+    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
 
 settings = Settings()

@@ -1,6 +1,6 @@
 [flake8]
 ingore = E203, E266, E501, W503, G200, G201, P103
-max-line-length = 88
+max-line-length = 100
 max-complexity = 8
 exclude = .git,.env,pg_migrations,migrations,env,venv
 per-file-ignores =
