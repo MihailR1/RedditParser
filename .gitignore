@@ -3,15 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# User files
-test.py
-run.bat
-webapp.db
-media/
-logs/
-
-# C extensions
-*.so
 
 # Distribution / packaging
 .Python
@@ -70,10 +61,6 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
-instance/
-.webassets-cache
-.flaskenv
 
 # Scrapy stuff:
 .scrapy
@@ -134,10 +121,3 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre type checker
-.pyre/
-
-*.png
-*.jpg
-*.jpeg
