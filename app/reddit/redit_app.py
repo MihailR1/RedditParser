@@ -35,7 +35,7 @@ class RedditPosts(Reddit, FilterPostMixin, CountMixins):
     def grab_hot_posts_from_subbredid_by_name(
             self,
             subbredid: str,
-            limit=200) -> list[RedditPostSchema]:
+            limit: int = 200) -> list[RedditPostSchema]:
 
         try:
             top_posts: Iterator[praw.reddit.Subreddit] = self.reddit.subreddit(subbredid).hot(limit=limit)
@@ -50,7 +50,7 @@ class RedditPosts(Reddit, FilterPostMixin, CountMixins):
     def grab_hot_posts_from_subbredid_schema(
             self,
             subbredid: SubbReditSchema,
-            limit=200) -> list[RedditPostSchema]:
+            limit: int = 200) -> list[RedditPostSchema]:
 
         top_posts: list[RedditPostSchema] = self.grab_hot_posts_from_subbredid_by_name(
             subbredid.name, limit
