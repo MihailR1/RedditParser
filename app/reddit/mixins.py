@@ -11,7 +11,7 @@ from app.schemas import RedditPostSchema, SubbReditSchema
 class ConvertSchemasMixin:
     @staticmethod
     def convert_subreddits_to_schema(
-            subbredits: list[praw.reddit.Subreddit]) -> list[SubbReditSchema]:
+            subbredits: Iterator[praw.reddit.Subreddit]) -> list[SubbReditSchema]:
 
         subbredits_list: list = []
 
@@ -114,7 +114,7 @@ class CountMixins:
     def presentation_poplar_comments_and_posts(
             text_type: PopularTextTypes,
             list_with_users: list[tuple[str, int]],
-            limit: int = 10) -> dict[str | str]:
+            limit: int = 10) -> dict[str, str]:
 
         result_dict: dict = {}
 

@@ -1,8 +1,8 @@
 import prawcore
 import pytest
 
-from app.exceptions import ConnectionProblemToReddit, WrongSubbredditName
-from app.reddit.redit_app import reddit, reddit_posts
+from app.exceptions import WrongSubbredditName
+from app.reddit.redit_app import reddit_posts
 
 
 async def test__RedditPosts__exceptions():

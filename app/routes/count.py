@@ -35,7 +35,7 @@ async def popular_posts(
         filtered_posts_from_subbredit
     )
 
-    represent_posts: typing.Mapping[str | str] = reddit_posts.presentation_poplar_comments_and_posts(
+    represent_posts: typing.Mapping[str, str] = reddit_posts.presentation_poplar_comments_and_posts(
         PopularTextTypes.post, count_user_posts, limit_of_user_to_show
     )
 
@@ -63,7 +63,7 @@ async def popular_comments(
         filtered_posts_from_subbredit
     )
 
-    represent_comments: typing.Mapping[str | str] = reddit_posts.presentation_poplar_comments_and_posts(
+    represent_comments: typing.Mapping[str, str] = reddit_posts.presentation_poplar_comments_and_posts(
         PopularTextTypes.comment, count_user_comments, limit_of_user_to_show
     )
 

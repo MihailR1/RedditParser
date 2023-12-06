@@ -20,7 +20,7 @@ class Reddit(ConvertSchemasMixin):
 
     def get_list_of_popular_subreddits(self, limit: int = 200) -> list[SubbReditSchema]:
         try:
-            reddits_iterator: list[praw.reddit.Subreddit] = self.reddit.subreddits.popular(limit=limit)
+            reddits_iterator: Iterator[praw.reddit.Subreddit] = self.reddit.subreddits.popular(limit=limit)
         except Exception:
             """Exceptions из библиотеки praw почему-то не отрабатывают"""
             raise ConnectionProblemToReddit
