@@ -27,19 +27,22 @@ async def popular_posts(
     **На больших лимитах (200) - парсить будет долго 3-5 минуты,
     но соберет за все 3 дня"""
 
-    filtered_posts_from_subbredit: list[RedditPostSchema] = await posts_from_subbreditd_by_name(
+    filtered_posts_from_subbredit: list[RedditPostSchema] | None = await posts_from_subbreditd_by_name(
         subbredit_name, posts_limit, post_for_days
     )
 
-    count_user_posts: list[tuple[str, int]] = reddit_posts.count_author_posts(
-        filtered_posts_from_subbredit
-    )
+    if filtered_posts_from_subbredit:
+        count_user_posts: list[tuple[str, int]] = reddit_posts.count_author_posts(
+            filtered_posts_from_subbredit
+        )
 
-    represent_posts: typing.Mapping[str | str] = reddit_posts.presentation_poplar_comments_and_posts(
-        PopularTextTypes.post, count_user_posts, limit_of_user_to_show
-    )
+        represent_posts: typing.Mapping[str, str] = reddit_posts.presentation_poplar_comments_and_posts(
+            PopularTextTypes.post, count_user_posts, limit_of_user_to_show
+        )
 
-    return represent_posts
+        return represent_posts
+
+    return None
 
 
 @router.get('/comments/{subbredit_name}')
@@ -55,16 +58,19 @@ async def popular_comments(
         **На больших лимитах (200) - парсить будет долго 3-5 минуты,
         но соберет за все 3 дня"""
 
-    filtered_posts_from_subbredit: list[RedditPostSchema] = await posts_from_subbreditd_by_name(
+    filtered_posts_from_subbredit: list[RedditPostSchema] | None = await posts_from_subbreditd_by_name(
         subbredit_name, posts_limit, post_for_days
     )
 
-    count_user_comments: list[tuple[str, int]] = reddit_posts.count_comments_by_user(
-        filtered_posts_from_subbredit
-    )
+    if filtered_posts_from_subbredit:
+        count_user_comments: list[tuple[str, int]] = reddit_posts.count_comments_by_user(
+            filtered_posts_from_subbredit
+        )
 
-    represent_comments: typing.Mapping[str | str] = reddit_posts.presentation_poplar_comments_and_posts(
-        PopularTextTypes.comment, count_user_comments, limit_of_user_to_show
-    )
+        represent_comments: typing.Mapping[str, str] = reddit_posts.presentation_poplar_comments_and_posts(
+            PopularTextTypes.comment, count_user_comments, limit_of_user_to_show
+        )
 
-    return represent_comments
+        return represent_comments
+
+    return None

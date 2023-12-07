@@ -5,13 +5,13 @@ import praw
 
 from app.config import settings
 from app.enums import PopularTextTypes
-from app.schemas import RedditPostSchema, SubbReditSchema
+from app.schemas import RedditPostSchema, SubbReditSchema, RedditCommentSchema
 
 
 class ConvertSchemasMixin:
     @staticmethod
     def convert_subreddits_to_schema(
-            subbredits: list[praw.reddit.Subreddit]) -> list[SubbReditSchema]:
+            subbredits: Iterator[praw.reddit.Subreddit]) -> list[SubbReditSchema]:
 
         subbredits_list: list = []
 
@@ -49,6 +49,21 @@ class ConvertSchemasMixin:
             pass
 
         return result_dict if result_dict else None
+
+    def get_comments_from_post(
+            self,
+            post: praw.reddit.Subreddit,
+            limit: int = 15) -> list[RedditCommentSchema] | None:
+
+        top_comments: list[praw.reddit.Comment] = post.comments.list()[:limit]
+        result_list: list = []
+
+        for comment in top_comments:
+            parsed_comment: dict[str, str | int] | None = self.convert_comment_to_schema(comment)
+            if parsed_comment:
+                result_list.append(parsed_comment)
+
+        return result_list if result_list else None
 
     def convert_posts_to_schema(
             self, subbredit_name: str,
@@ -114,7 +129,7 @@ class CountMixins:
     def presentation_poplar_comments_and_posts(
             text_type: PopularTextTypes,
             list_with_users: list[tuple[str, int]],
-            limit: int = 10) -> dict[str | str]:
+            limit: int = 10) -> dict[str, str]:
 
         result_dict: dict = {}
 
@@ -125,24 +140,3 @@ class CountMixins:
             result_dict[f'Номер {index}'] = f'{user} - {text_type.value}: {count}шт.'
 
         return result_dict
-
-
-class FilterPostMixin:
-    @staticmethod
-    def get_datetime_few_days_behind(
-            date_start: datetime.datetime = datetime.datetime.utcnow(),
-            days_behind: int = 3) -> datetime.datetime:
-
-        new_date = date_start - datetime.timedelta(days=days_behind)
-
-        return new_date
-
-    def filter_posts_by_date_range(
-            self,
-            posts: list[RedditPostSchema],
-            day_start: datetime.datetime = datetime.datetime.utcnow(),
-            days_behind: int = 3) -> list[RedditPostSchema]:
-
-        datetime_behind: datetime.datetime = self.get_datetime_few_days_behind(day_start, days_behind)
-        filtered_posts = [post for post in posts if post.created_at_utc >= datetime_behind]
-        return filtered_posts
