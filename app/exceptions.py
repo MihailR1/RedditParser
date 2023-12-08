@@ -14,6 +14,6 @@ class ConnectionProblemToReddit(BaseExcep):
     detail = "Ошибка подключения к апи"
 
 
-class WrongsubredditName(BaseExcep):
+class WrongSubredditName(BaseExcep):
     status_code = status.HTTP_404_NOT_FOUND
     detail = "Имя сабреддита не существует"

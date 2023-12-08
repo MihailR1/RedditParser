@@ -7,7 +7,7 @@ import prawcore
 
 from app.config import settings
 from app.enums import TimeFilterPosts
-from app.exceptions import ConnectionProblemToReddit, WrongsubredditName
+from app.exceptions import ConnectionProblemToReddit, WrongSubredditName
 from app.reddit.mixins import ConvertSchemasMixin, CountMixins
 from app.schemas import RedditPostSchema, SubredditSchema
 
@@ -49,7 +49,7 @@ class RedditPosts(Reddit, CountMixins):
             )
         except prawcore.exceptions.Redirect:
             """Ошибки из библиотеки praw почему-то не отрабатывают"""
-            raise WrongsubredditName
+            raise WrongSubredditName
 
         post_parsed_as_schema: list[RedditPostSchema] = self.convert_posts_to_schema(subbredid, top_posts)
 
