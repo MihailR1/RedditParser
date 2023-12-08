@@ -1,7 +1,7 @@
 import prawcore
 import pytest
 
-from app.exceptions import WrongSubbredditName
+from app.exceptions import WrongsubredditName
 from app.reddit.redit_app import reddit_posts
 
 

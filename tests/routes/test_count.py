@@ -4,7 +4,7 @@ from app.routes.count import popular_posts, popular_comments
 
 
 @pytest.mark.parametrize(
-    'subbredit_name, posts_limit, limit_of_user_to_show',
+    'subreddit_name, posts_limit, limit_of_user_to_show',
     [
         ('AskReddit', 5, 10),
         ('Home', -2, 15),
@@ -13,9 +13,9 @@ from app.routes.count import popular_posts, popular_comments
         ('/me_irl/', 20, 15)
     ]
 )
-async def test__popular_posts__different_kwargs(subbredit_name, posts_limit, limit_of_user_to_show):
+async def test__popular_posts__different_kwargs(subreddit_name, posts_limit, limit_of_user_to_show):
     result = await popular_posts(
-        subbredit_name=subbredit_name,
+        subreddit_name=subreddit_name,
         posts_limit=posts_limit,
         limit_of_user_to_show=limit_of_user_to_show
     )
@@ -26,7 +26,7 @@ async def test__popular_posts__different_kwargs(subbredit_name, posts_limit, lim
 
 
 @pytest.mark.parametrize(
-    'subbredit_name, posts_limit, limit_of_user_to_show',
+    'subreddit_name, posts_limit, limit_of_user_to_show',
     [
         ('AskReddit', 5, 10),
         ('Home', -2, 15),
@@ -35,9 +35,9 @@ async def test__popular_posts__different_kwargs(subbredit_name, posts_limit, lim
         ('/me_irl/', 10, 15)
     ]
 )
-async def test__popular_comments__different_kwargs(subbredit_name, posts_limit, limit_of_user_to_show):
+async def test__popular_comments__different_kwargs(subreddit_name, posts_limit, limit_of_user_to_show):
     result = await popular_comments(
-        subbredit_name=subbredit_name,
+        subreddit_name=subreddit_name,
         posts_limit=posts_limit,
         limit_of_user_to_show=limit_of_user_to_show
     )

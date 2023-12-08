@@ -5,25 +5,25 @@ import praw
 
 from app.config import settings
 from app.enums import PopularTextTypes
-from app.schemas import RedditPostSchema, SubbReditSchema, RedditCommentSchema
+from app.schemas import RedditPostSchema, SubredditSchema, RedditCommentSchema
 
 
 class ConvertSchemasMixin:
     @staticmethod
     def convert_subreddits_to_schema(
-            subbredits: Iterator[praw.reddit.Subreddit]) -> list[SubbReditSchema]:
+            subreddits: Iterator[praw.reddit.Subreddit]) -> list[SubredditSchema]:
 
-        subbredits_list: list = []
+        subreddits_list: list = []
 
-        for index, subreddit in enumerate(subbredits, 1):
+        for index, subreddit in enumerate(subreddits, 1):
             full_url = settings.REDDIT_BASE_URL + subreddit.url
-            *_, name_subbredit, _ = subreddit.url.split('/')
-            subbredits_list.append(
-                SubbReditSchema.model_validate(
-                    {'index': index, 'name': name_subbredit, 'full_url': full_url}
+            *_, name_subreddit, _ = subreddit.url.split('/')
+            subreddits_list.append(
+                SubredditSchema.model_validate(
+                    {'index': index, 'name': name_subreddit, 'full_url': full_url}
                 ))
 
-        return subbredits_list
+        return subreddits_list
 
     @staticmethod
     def convert_comment_to_schema(comment: praw.reddit.Comment) -> dict[str, str | int] | None:
@@ -66,7 +66,7 @@ class ConvertSchemasMixin:
         return result_list if result_list else None
 
     def convert_posts_to_schema(
-            self, subbredit_name: str,
+            self, subreddit_name: str,
             all_posts: Iterator[praw.reddit.Subreddit]) -> list[RedditPostSchema]:
 
         result_list: list = []
@@ -76,7 +76,7 @@ class ConvertSchemasMixin:
                 title = post.title
                 author = post.author.name
                 author_id = post.author_fullname
-                subbreddit_name = subbredit_name
+                subreddit_name = subreddit_name
                 created_at_utc = datetime.datetime.fromtimestamp(post.created_utc)
                 full_url = settings.REDDIT_BASE_URL + post.permalink
                 number_of_comments = post.num_comments
@@ -87,7 +87,7 @@ class ConvertSchemasMixin:
                     'title': title,
                     'author': author,
                     'author_id': author_id,
-                    'subbreddit_name': subbreddit_name,
+                    'subreddit_name': subreddit_name,
                     'created_at_utc': created_at_utc,
                     'full_url': full_url,
                     'number_of_comments': number_of_comments,

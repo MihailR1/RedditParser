@@ -7,9 +7,9 @@ import prawcore
 
 from app.config import settings
 from app.enums import TimeFilterPosts
-from app.exceptions import ConnectionProblemToReddit, WrongSubbredditName
+from app.exceptions import ConnectionProblemToReddit, WrongsubredditName
 from app.reddit.mixins import ConvertSchemasMixin, CountMixins
-from app.schemas import RedditPostSchema, SubbReditSchema
+from app.schemas import RedditPostSchema, SubredditSchema
 
 
 @dataclasses.dataclass(slots=True)
@@ -21,18 +21,17 @@ class Reddit(ConvertSchemasMixin):
         user_agent=settings.REDDIT_USER_AGENT,
     )
 
-    def get_list_of_popular_subreddits(self, limit: int = 200) -> list[SubbReditSchema]:
+    def get_list_of_popular_subreddits(self, limit: int = 200) -> list[SubredditSchema]:
 
         try:
             reddits_iterator: Iterator[praw.reddit.Subreddit] = self.reddit.subreddits.popular(limit=limit)
-        except Exception:
-            """Exceptions из библиотеки praw почему-то не отрабатывают"""
+        except prawcore.exceptions.PrawcoreException:
             raise ConnectionProblemToReddit
 
-        subbredits_parsed_to_schema: list[SubbReditSchema] = self.convert_subreddits_to_schema(
+        subreddits_parsed_to_schema: list[SubredditSchema] = self.convert_subreddits_to_schema(
             reddits_iterator)
 
-        return subbredits_parsed_to_schema
+        return subreddits_parsed_to_schema
 
 
 @dataclasses.dataclass(slots=True)
@@ -50,7 +49,7 @@ class RedditPosts(Reddit, CountMixins):
             )
         except prawcore.exceptions.Redirect:
             """Ошибки из библиотеки praw почему-то не отрабатывают"""
-            raise WrongSubbredditName
+            raise WrongsubredditName
 
         post_parsed_as_schema: list[RedditPostSchema] = self.convert_posts_to_schema(subbredid, top_posts)
 

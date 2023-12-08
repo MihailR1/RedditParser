@@ -1,19 +1,19 @@
 from fastapi import APIRouter
 
 from app.reddit.redit_app import reddit
-from app.schemas import SubbReditSchema
+from app.schemas import SubredditSchema
 
 router = APIRouter(
-    prefix="/subbredits",
-    tags=["Получить саббредиты"],
+    prefix="/subreddits",
+    tags=["Получить сабреддиты"],
 )
 
 
 @router.get('/')
-async def popular_subbredits(
-        subbreddit_limit: int = 150) -> list[SubbReditSchema]:
+async def popular_subreddits(
+        subreddit_limit: int = 150) -> list[SubredditSchema]:
 
-    popular_subbredits: list[SubbReditSchema] = reddit.get_list_of_popular_subreddits(
-        limit=subbreddit_limit
+    popular_subreddits: list[SubredditSchema] = reddit.get_list_of_popular_subreddits(
+        limit=subreddit_limit
     )
-    return popular_subbredits
+    return popular_subreddits
