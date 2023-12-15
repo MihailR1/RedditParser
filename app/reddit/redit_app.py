@@ -1,5 +1,4 @@
 import dataclasses
-import datetime
 from typing import Iterator
 
 import praw
@@ -8,7 +7,7 @@ import prawcore
 from app.config import settings
 from app.enums import TimeFilterPosts
 from app.exceptions import ConnectionProblemToReddit, WrongSubredditName
-from app.reddit.mixins import ConvertSchemasMixin, CountMixins
+from app.reddit.mixins import ConvertSchemasMixin, UtilsMixins
 from app.schemas import RedditPostSchema, SubredditSchema
 
 
@@ -35,7 +34,7 @@ class Reddit(ConvertSchemasMixin):
 
 
 @dataclasses.dataclass(slots=True)
-class RedditPosts(Reddit, CountMixins):
+class RedditPosts(Reddit, UtilsMixins):
     def grab_top_posts_from_subbredid_by_name(
             self,
             subbredid: str,
@@ -48,24 +47,11 @@ class RedditPosts(Reddit, CountMixins):
                 time_filter=time_filter.value
             )
         except prawcore.exceptions.Redirect:
-            """Ошибки из библиотеки praw почему-то не отрабатывают"""
             raise WrongSubredditName
 
         post_parsed_as_schema: list[RedditPostSchema] = self.convert_posts_to_schema(subbredid, top_posts)
 
         return post_parsed_as_schema
-
-    @staticmethod
-    def filter_posts_by_date_range(
-            posts: list[RedditPostSchema],
-            day_start: datetime.datetime = datetime.datetime.utcnow(),
-            days_behind: int = 3) -> list[RedditPostSchema] | None:
-
-        datetime_behind: datetime.datetime = day_start - datetime.timedelta(days=days_behind)
-        filtered_posts: Iterator = filter(lambda post: post.created_at_utc >= datetime_behind, posts)
-        filter_posts: list = list(filtered_posts)
-
-        return filter_posts if filter_posts else None
 
 
 reddit = Reddit()

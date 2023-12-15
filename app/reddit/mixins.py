@@ -103,7 +103,7 @@ class ConvertSchemasMixin:
         return result_list
 
 
-class CountMixins:
+class UtilsMixins:
     @staticmethod
     def count_author_posts(posts: list[RedditPostSchema]) -> list[tuple[str, int]]:
         result_dict: dict = {}
@@ -140,3 +140,16 @@ class CountMixins:
             result_dict[f'Номер {index}'] = f'{user} - {text_type.value}: {count}шт.'
 
         return result_dict
+
+    @staticmethod
+    def filter_posts_by_date_range(
+            posts: list[RedditPostSchema],
+            day_start: datetime.datetime = datetime.datetime.utcnow(),
+            days_behind: int = 3) -> list[RedditPostSchema] | None:
+
+        datetime_behind: datetime.datetime = day_start - datetime.timedelta(days=days_behind)
+        filtered_posts: Iterator = filter(lambda post: post.created_at_utc >= datetime_behind,
+                                          posts)
+        filter_posts: list = list(filtered_posts)
+
+        return filter_posts if filter_posts else None
