@@ -1,19 +1,20 @@
 import datetime
-from typing import Iterator, Type
+from typing import Iterator, Type, Union
 
 import praw
 import pydantic
 import pytz as pytz
 
 from app.enums import PopularTextTypes
-from app.schemas import RedditPostSchema, RedditCommentSchema
+from app.schemas import RedditCommentSchema, RedditPostSchema, SubredditSchema
 
 
 class ConvertSchemasMixin:
     @staticmethod
     def validate_to_schema(
             schema: Type[pydantic.BaseModel],
-            data: praw) -> pydantic.BaseModel | None:
+            data: praw) -> Union[pydantic.BaseModel, RedditCommentSchema, RedditPostSchema, SubredditSchema, None]:
+
         if not isinstance(data, dict):
             dict_data = data.__dict__
         else:
@@ -27,11 +28,12 @@ class ConvertSchemasMixin:
     @staticmethod
     def validate_list_to_schema(
             data: Iterator[praw.reddit],
-            schema: Type[pydantic.BaseModel]) -> list[Type[pydantic.BaseModel]]:
+            schema: Type[pydantic.BaseModel]
+    ) -> Union[list[pydantic.BaseModel | RedditCommentSchema | RedditPostSchema | SubredditSchema], None]:
 
         result_list: list = []
         for one_data in data:
-            result_list.append(__class__.validate_to_schema(schema, one_data))
+            result_list.append(ConvertSchemasMixin.validate_to_schema(schema, one_data))
 
         return result_list
 
@@ -41,13 +43,13 @@ class ConvertSchemasMixin:
             limit: int = 15) -> list[RedditCommentSchema] | None:
 
         top_comments: list[praw.reddit.Comment] = post.comments.list()[:limit]
-        result = self.validate_list_to_schema(top_comments, RedditCommentSchema)
+        result: list[RedditCommentSchema] = self.validate_list_to_schema(top_comments, RedditCommentSchema)
 
         return result
 
-    def convert_posts_to_schema(self,
-                                all_posts: Iterator[praw.reddit.Subreddit]
-                                ) -> list[RedditPostSchema]:
+    def convert_posts_to_schema(
+            self,
+            all_posts: Iterator[praw.reddit.Subreddit]) -> list[RedditPostSchema]:
 
         result_list: list = []
 

@@ -1,7 +1,7 @@
 import datetime
 from typing import Any
 
-from pydantic import BaseModel, AliasPath, Field, computed_field
+from pydantic import AliasPath, BaseModel, Field, computed_field
 
 from app.config import settings
 
