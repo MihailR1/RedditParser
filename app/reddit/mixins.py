@@ -1,19 +1,19 @@
 import datetime
-from typing import Iterator, Type, Union
+from typing import Iterator, TypeVar, Generic
 
 import praw
 import pydantic
 import pytz as pytz
 
 from app.enums import PopularTextTypes
-from app.schemas import RedditCommentSchema, RedditPostSchema, SubredditSchema
+from app.schemas import RedditCommentSchema, RedditPostSchema
 
 
 class ConvertSchemasMixin:
+    _SchemaType = TypeVar('_SchemaType', bound=pydantic.BaseModel)
+
     @staticmethod
-    def validate_to_schema(
-            schema: Type[pydantic.BaseModel],
-            data: praw) -> Union[pydantic.BaseModel, RedditCommentSchema, RedditPostSchema, SubredditSchema, None]:
+    def validate_to_schema(schema: Generic[_SchemaType], data: praw) -> _SchemaType | None:
 
         if not isinstance(data, dict):
             dict_data = data.__dict__
@@ -27,9 +27,7 @@ class ConvertSchemasMixin:
 
     @staticmethod
     def validate_list_to_schema(
-            data: Iterator[praw.reddit],
-            schema: Type[pydantic.BaseModel]
-    ) -> Union[list[pydantic.BaseModel | RedditCommentSchema | RedditPostSchema | SubredditSchema], None]:
+            data: Iterator[praw.reddit],  schema: Generic[_SchemaType]) -> list[_SchemaType]:
 
         result_list: list = []
         for one_data in data:
@@ -43,7 +41,10 @@ class ConvertSchemasMixin:
             limit: int = 15) -> list[RedditCommentSchema] | None:
 
         top_comments: list[praw.reddit.Comment] = post.comments.list()[:limit]
-        result: list[RedditCommentSchema] = self.validate_list_to_schema(top_comments, RedditCommentSchema)
+        result: list[RedditCommentSchema] = self.validate_list_to_schema(
+            top_comments,
+            RedditCommentSchema
+        )
 
         return result
 
