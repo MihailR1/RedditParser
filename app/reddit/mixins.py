@@ -1,54 +1,39 @@
 import datetime
-from typing import Iterator
+from typing import Iterator, Type
 
 import praw
+import pydantic
+import pytz as pytz
 
-from app.config import settings
 from app.enums import PopularTextTypes
-from app.schemas import RedditPostSchema, SubredditSchema, RedditCommentSchema
+from app.schemas import RedditPostSchema, RedditCommentSchema
 
 
 class ConvertSchemasMixin:
     @staticmethod
-    def convert_subreddits_to_schema(
-            subreddits: Iterator[praw.reddit.Subreddit]) -> list[SubredditSchema]:
+    def validate_to_schema(
+            schema: Type[pydantic.BaseModel],
+            data: praw) -> pydantic.BaseModel | None:
+        if not isinstance(data, dict):
+            dict_data = data.__dict__
+        else:
+            dict_data = data
 
-        subreddits_list: list = []
-
-        for index, subreddit in enumerate(subreddits, 1):
-            full_url = settings.REDDIT_BASE_URL + subreddit.url
-            *_, name_subreddit, _ = subreddit.url.split('/')
-            subreddits_list.append(
-                SubredditSchema.model_validate(
-                    {'index': index, 'name': name_subreddit, 'full_url': full_url}
-                ))
-
-        return subreddits_list
+        try:
+            return schema.model_validate(dict_data)
+        except pydantic.ValidationError:
+            return None
 
     @staticmethod
-    def convert_comment_to_schema(comment: praw.reddit.Comment) -> dict[str, str | int] | None:
-        result_dict = {}
-        try:
-            author = comment.author.name
-            author_id = comment.author_fullname
-            datetime_post = datetime.datetime.fromtimestamp(comment.created_utc)
-            score = comment.score
-            comment_txt = comment.body
-            link = settings.REDDIT_BASE_URL + comment.permalink
+    def validate_list_to_schema(
+            data: Iterator[praw.reddit],
+            schema: Type[pydantic.BaseModel]) -> list[Type[pydantic.BaseModel]]:
 
-            result_dict = {
-                'author': author,
-                'author_id': author_id,
-                'datetime_post': datetime_post,
-                'score': score,
-                'comment_text': comment_txt,
-                'link': link
-            }
-        except AttributeError:
-            "Если автор комментария удалил свой аккаунт, то получить имя автора не получится - будет ошибка"
-            pass
+        result_list: list = []
+        for one_data in data:
+            result_list.append(__class__.validate_to_schema(schema, one_data))
 
-        return result_dict if result_dict else None
+        return result_list
 
     def get_comments_from_post(
             self,
@@ -56,49 +41,21 @@ class ConvertSchemasMixin:
             limit: int = 15) -> list[RedditCommentSchema] | None:
 
         top_comments: list[praw.reddit.Comment] = post.comments.list()[:limit]
-        result_list: list = []
+        result = self.validate_list_to_schema(top_comments, RedditCommentSchema)
 
-        for comment in top_comments:
-            parsed_comment: dict[str, str | int] | None = self.convert_comment_to_schema(comment)
-            if parsed_comment:
-                result_list.append(parsed_comment)
+        return result
 
-        return result_list if result_list else None
-
-    def convert_posts_to_schema(
-            self, subreddit_name: str,
-            all_posts: Iterator[praw.reddit.Subreddit]) -> list[RedditPostSchema]:
+    def convert_posts_to_schema(self,
+                                all_posts: Iterator[praw.reddit.Subreddit]
+                                ) -> list[RedditPostSchema]:
 
         result_list: list = []
 
         for post in all_posts:
-            try:
-                title = post.title
-                author = post.author.name
-                author_id = post.author_fullname
-                subreddit_name = subreddit_name
-                created_at_utc = datetime.datetime.fromtimestamp(post.created_utc)
-                full_url = settings.REDDIT_BASE_URL + post.permalink
-                number_of_comments = post.num_comments
-                score = post.score
-                ups = post.ups
-                comments = self.get_comments_from_post(post)
-                result_dict = {
-                    'title': title,
-                    'author': author,
-                    'author_id': author_id,
-                    'subreddit_name': subreddit_name,
-                    'created_at_utc': created_at_utc,
-                    'full_url': full_url,
-                    'number_of_comments': number_of_comments,
-                    'score': score,
-                    'ups': ups,
-                    'comments': comments
-                }
-                result_list.append(RedditPostSchema.model_validate(result_dict))
-            except AttributeError:
-                "Если автор поста удалил свой аккаунт, то получить имя автора не получится - будет ошибка"
-                continue
+            comments = self.get_comments_from_post(post)
+            data = post.__dict__
+            data['comments'] = comments
+            result_list.append(self.validate_to_schema(RedditPostSchema, data))
 
         return result_list
 
@@ -147,9 +104,11 @@ class UtilsMixins:
             day_start: datetime.datetime = datetime.datetime.utcnow(),
             days_behind: int = 3) -> list[RedditPostSchema] | None:
 
-        datetime_behind: datetime.datetime = day_start - datetime.timedelta(days=days_behind)
-        filtered_posts: Iterator = filter(lambda post: post.created_at_utc >= datetime_behind,
-                                          posts)
+        datetime_behind: datetime.datetime = (day_start - datetime.timedelta(days=days_behind)
+                                              ).replace(tzinfo=pytz.UTC)
+        filtered_posts: Iterator = filter(
+            lambda post: post is not None and post.created_at_utc >= datetime_behind, posts
+        )
         filter_posts: list = list(filtered_posts)
 
         return filter_posts if filter_posts else None

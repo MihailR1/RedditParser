@@ -27,8 +27,8 @@ class Reddit(ConvertSchemasMixin):
         except prawcore.exceptions.PrawcoreException:
             raise ConnectionProblemToReddit
 
-        subreddits_parsed_to_schema: list[SubredditSchema] = self.convert_subreddits_to_schema(
-            reddits_iterator)
+        subreddits_parsed_to_schema: list[SubredditSchema] = self.validate_list_to_schema(
+            reddits_iterator, SubredditSchema)
 
         return subreddits_parsed_to_schema
 
@@ -49,7 +49,7 @@ class RedditPosts(Reddit, UtilsMixins):
         except prawcore.exceptions.Redirect:
             raise WrongSubredditName
 
-        post_parsed_as_schema: list[RedditPostSchema] = self.convert_posts_to_schema(subbredid, top_posts)
+        post_parsed_as_schema: list[RedditPostSchema] = self.convert_posts_to_schema(top_posts)
 
         return post_parsed_as_schema
 
